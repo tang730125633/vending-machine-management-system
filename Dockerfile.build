@@ -1,0 +1,28 @@
+# 使用包含 Maven 的镜像
+FROM maven:3.9-eclipse-temurin-17 AS builder
+
+WORKDIR /app
+
+# 复制项目文件
+COPY pom.xml .
+COPY src ./src
+
+# 构建项目（不运行测试）
+RUN mvn clean package -DskipTests
+
+# 运行时镜像
+FROM eclipse-temurin:17-jre
+
+WORKDIR /app
+
+# 复制配置文件
+COPY src/main/resources/application.yml /tmp/application.yml
+
+# 从构建阶段复制 jar 文件
+COPY --from=builder /app/target/vending-machine-management-1.0.0.jar app.jar
+
+# 暴露端口
+EXPOSE 8080
+
+# 启动应用
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.location=/tmp/application.yml"]

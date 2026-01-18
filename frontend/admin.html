@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自动售货机管理系统 - 管理后台</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        /* 登录区域 */
+        .login-section {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .login-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+            text-align: center;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* 管理区域 */
+        .admin-section {
+            display: none;
+        }
+
+        .admin-section.active {
+            display: block;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .user-info h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .action-area {
+            margin-bottom: 20px;
+        }
+
+        .action-area button {
+            margin-bottom: 10px;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        /* 数据展示区域 */
+        .data-section {
+            margin-top: 20px;
+        }
+
+        .data-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .data-table th {
+            background: #667eea;
+            color: white;
+            font-weight: 500;
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .json-output {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 12px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* 运营看板样式 */
+        .dashboard {
+            margin-top: 20px;
+        }
+
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .dashboard-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+
+        .dashboard-card.revenue {
+            border-left-color: #28a745;
+        }
+
+        .dashboard-card.top3 {
+            border-left-color: #ffc107;
+        }
+
+        .dashboard-card.devices {
+            border-left-color: #17a2b8;
+        }
+
+        .dashboard-card .label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .dashboard-card .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .dashboard-card .value.small {
+            font-size: 20px;
+        }
+
+        .dashboard-section {
+            margin-bottom: 25px;
+        }
+
+        .dashboard-section h4 {
+            margin-bottom: 12px;
+            color: #333;
+            font-size: 16px;
+        }
+
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .mini-table th {
+            background: #f8f9fa;
+            padding: 10px;
+            text-align: left;
+            font-weight: 500;
+            color: #555;
+            font-size: 13px;
+        }
+
+        .mini-table td {
+            padding: 10px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        .mini-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .status-badge.online {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-badge.offline {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏪 自动售货机管理系统</h1>
+            <p>管理后台</p>
+        </div>
+
+        <div class="content">
+            <!-- 登录区域 -->
+            <div class="login-section" id="loginSection">
+                <h2>管理员登录</h2>
+                <p style="text-align: center; color: #666; font-size: 13px; margin-bottom: 15px; line-height: 1.6;">
+                    ⚠️ 前后端是解耦的，前端依赖后端 API。<br>
+                    如果后端服务未启动，前端会提示网络错误；<br>
+                    启动后端后，登录和业务功能即可正常使用。
+                </p>
+                <div class="message" id="loginMessage"></div>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label>用户名</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>密码</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <button type="submit">登录</button>
+                </form>
+            </div>
+
+            <!-- 管理区域 -->
+            <div class="admin-section" id="adminSection">
+                <div class="user-info">
+                    <h3>👤 <span id="displayUsername"></span></h3>
+                    <p>角色：<span id="displayRole"></span> | API: <span id="apiBaseDisplay" style="font-size: 12px; color: #999;">http://localhost:8080/api</span></p>
+                </div>
+
+                <div class="action-area">
+                    <button onclick="fetchDashboard()">📊 刷新运营看板</button>
+                    <button class="logout-btn" onclick="logout()">退出登录</button>
+                </div>
+
+                <!-- 运营看板 -->
+                <div class="dashboard" id="dashboardArea" style="display:none;">
+                    <div class="dashboard-cards">
+                        <div class="dashboard-card">
+                            <div class="label">今日订单数</div>
+                            <div class="value" id="todayOrders">0</div>
+                        </div>
+                        <div class="dashboard-card revenue">
+                            <div class="label">今日销售额</div>
+                            <div class="value" id="todayRevenue">¥0</div>
+                        </div>
+                        <div class="dashboard-card top3">
+                            <div class="label">热销Top1</div>
+                            <div class="value small" id="topProduct">-</div>
+                        </div>
+                        <div class="dashboard-card devices">
+                            <div class="label">设备总数</div>
+                            <div class="value" id="deviceCount">0</div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-section">
+                        <h4>📈 热销商品 Top3</h4>
+                        <table class="mini-table" id="top3Table">
+                            <thead>
+                                <tr>
+                                    <th>排名</th>
+                                    <th>商品名称</th>
+                                    <th>销量</th>
+                                </tr>
+                            </thead>
+                            <tbody id="top3Body">
+                                <tr><td colspan="3" style="text-align: center; color: #999;">暂无数据</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="dashboard-section">
+                        <h4>📍 设备点位</h4>
+                        <table class="mini-table" id="devicesTable">
+                            <thead>
+                                <tr>
+                                    <th>设备名称</th>
+                                    <th>位置</th>
+                                    <th>状态</th>
+                                </tr>
+                            </thead>
+                            <tbody id="devicesBody">
+                                <tr><td colspan="3" style="text-align: center; color: #999;">暂无数据</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        let token = null;
+
+        // 更新API地址显示
+        document.addEventListener('DOMContentLoaded', () => {
+            const apiDisplay = document.getElementById('apiBaseDisplay');
+            if (apiDisplay) {
+                apiDisplay.textContent = API_BASE;
+            }
+        });
+
+        // 显示消息
+        function showMessage(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = 'message ' + (isError ? 'error' : 'success');
+            element.style.display = 'block';
+
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        // 登录
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const text = await response.text();
+
+                if (response.ok) {
+                    const data = JSON.parse(text);
+                    token = data.token;
+
+                    document.getElementById('displayUsername').textContent = data.user.username;
+                    document.getElementById('displayRole').textContent = data.user.role;
+
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('adminSection').classList.add('active');
+
+                    showMessage('loginMessage', '登录成功！');
+                } else {
+                    let errorMsg = '登录失败';
+                    try {
+                        const data = JSON.parse(text);
+                        errorMsg = data.message || errorMsg;
+                    } catch (e) {
+                        if (text) errorMsg = text;
+                    }
+                    showMessage('loginMessage', errorMsg, true);
+                }
+            } catch (error) {
+                showMessage('loginMessage', '网络错误: ' + error.message, true);
+            }
+        });
+
+        // 获取销售数据
+        async function fetchSalesData() {
+            const output = document.getElementById('dataOutput');
+
+            if (!token) {
+                output.innerHTML = '<p class="error">请先登录！</p>';
+                return;
+            }
+
+            output.innerHTML = '<p class="loading">正在加载数据...</p>';
+
+            try {
+                const response = await fetch(`${API_BASE}/analytics/sales-report?period=daily`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const text = await response.text();
+
+                if (!response.ok) {
+                    output.innerHTML = `<p class="error">错误: HTTP ${response.status}\n${text || '无响应内容'}</p>`;
+                    return;
+                }
+
+                if (!text || text.trim() === '') {
+                    output.innerHTML = '<p style="text-align: center; color: #666;">暂无数据</p>';
+                    return;
+                }
+
+                try {
+                    const data = JSON.parse(text);
+
+                    // 尝试渲染为表格
+                    const tableResult = renderTable(data);
+                    if (tableResult) {
+                        output.innerHTML = tableResult;
+                    } else {
+                        // 无法渲染为表格，显示JSON
+                        output.innerHTML = '<div class="json-output">' + JSON.stringify(data, null, 2) + '</div>';
+                    }
+                } catch (e) {
+                    output.innerHTML = '<div class="json-output">' + text + '</div>';
+                }
+            } catch (error) {
+                output.innerHTML = '<p class="error">请求失败: ' + error.message + '</p>';
+            }
+        }
+
+        // 渲染表格
+        function renderTable(data) {
+            if (!data || typeof data !== 'object') {
+                return null;
+            }
+
+            // 检查是否有数组数据可以渲染为表格
+            const arrayData = findArrayData(data);
+
+            if (arrayData && arrayData.length > 0) {
+                let tableHTML = '<table class="data-table"><thead><tr>';
+
+                // 获取所有可能的字段
+                const keys = Object.keys(arrayData[0]);
+
+                // 表头
+                keys.forEach(key => {
+                    tableHTML += `<th>${key}</th>`;
+                });
+                tableHTML += '</tr></thead><tbody>';
+
+                // 表体
+                arrayData.forEach(row => {
+                    tableHTML += '<tr>';
+                    keys.forEach(key => {
+                        tableHTML += `<td>${row[key] !== null && row[key] !== undefined ? row[key] : '-'}</td>`;
+                    });
+                    tableHTML += '</tr>';
+                });
+
+                tableHTML += '</tbody></table>';
+                return tableHTML;
+            }
+
+            return null;
+        }
+
+        // 查找可以渲染为表格的数组数据
+        function findArrayData(obj) {
+            if (Array.isArray(obj)) {
+                return obj;
+            }
+
+            for (const key in obj) {
+                if (Array.isArray(obj[key]) && obj[key].length > 0) {
+                    return obj[key];
+                }
+                if (typeof obj[key] === 'object') {
+                    const result = findArrayData(obj[key]);
+                    if (result) return result;
+                }
+            }
+
+            return null;
+        }
+
+        // 获取运营看板数据（答辩演示用）
+        async function fetchDashboard() {
+            if (!token) {
+                alert('请先登录！');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/analytics/dashboard`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    alert(`错误: HTTP ${response.status}\n${text || '无响应内容'}`);
+                    return;
+                }
+
+                const data = await response.json();
+                renderDashboard(data);
+            } catch (error) {
+                alert('请求失败: ' + error.message);
+            }
+        }
+
+        // 渲染运营看板
+        function renderDashboard(data) {
+            // 显示看板区域
+            document.getElementById('dashboardArea').style.display = 'block';
+
+            // 1. 更新卡片数据
+            document.getElementById('todayOrders').textContent = data.todayOrders || 0;
+            document.getElementById('todayRevenue').textContent = '¥' + (data.todayRevenue || 0);
+            document.getElementById('deviceCount').textContent = data.devices ? data.devices.length : 0;
+
+            // 2. 更新Top1商品
+            if (data.top3 && data.top3.length > 0) {
+                document.getElementById('topProduct').textContent = data.top3[0].name;
+            } else {
+                document.getElementById('topProduct').textContent = '-';
+            }
+
+            // 3. 渲染Top3表格
+            const top3Body = document.getElementById('top3Body');
+            if (data.top3 && data.top3.length > 0) {
+                let top3HTML = '';
+                data.top3.forEach((item, index) => {
+                    const medal = index === 0 ? '🥇' : index === 1 ? '🥈' : '🥉';
+                    top3HTML += `
+                        <tr>
+                            <td>${medal} ${index + 1}</td>
+                            <td>${item.name}</td>
+                            <td><strong>${item.qty}</strong></td>
+                        </tr>
+                    `;
+                });
+                top3Body.innerHTML = top3HTML;
+            } else {
+                top3Body.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #999;">暂无数据</td></tr>';
+            }
+
+            // 4. 渲染设备表格
+            const devicesBody = document.getElementById('devicesBody');
+            if (data.devices && data.devices.length > 0) {
+                let devicesHTML = '';
+                data.devices.forEach(device => {
+                    const statusClass = device.status === 'ONLINE' ? 'online' : 'offline';
+                    const statusText = device.status === 'ONLINE' ? '在线' : '离线';
+                    devicesHTML += `
+                        <tr>
+                            <td>${device.name}</td>
+                            <td>${device.location}</td>
+                            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                        </tr>
+                    `;
+                });
+                devicesBody.innerHTML = devicesHTML;
+            } else {
+                devicesBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: #999;">暂无数据</td></tr>';
+            }
+        }
+
+        // 退出登录
+        function logout() {
+            token = null;
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('adminSection').classList.remove('active');
+            document.getElementById('dashboardArea').style.display = 'none';
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+        }
+    </script>
+</body>
+</html>

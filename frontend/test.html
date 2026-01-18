@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>API 诊断测试</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px 5px;
+            cursor: pointer;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>🔍 自动售货机 API 诊断工具</h1>
+
+    <h2>测试按钮</h2>
+    <button onclick="testHealth()">1. 测试健康检查</button>
+    <button onclick="testLogin()">2. 测试登录</button>
+    <button onclick="testRegister()">3. 测试注册</button>
+    <button onclick="testCORS()">4. 测试CORS</button>
+
+    <h2>结果输出</h2>
+    <pre id="output">点击上方按钮开始测试...</pre>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        const output = document.getElementById('output');
+
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+            output.innerHTML += `<span style="color: ${color}">[${timestamp}] ${message}</span>\n`;
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clear() {
+            output.innerHTML = '';
+        }
+
+        async function testHealth() {
+            clear();
+            log('测试健康检查接口...');
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/health`);
+                log(`状态码: ${response.status}`, response.ok ? 'success' : 'error');
+                log(`响应头: ${JSON.stringify([...response.headers.entries()], null, 2)}`);
+
+                const text = await response.text();
+                log(`响应体(文本): ${text}`);
+
+                try {
+                    const json = JSON.parse(text);
+                    log(`响应体(JSON): ${JSON.stringify(json, null, 2)}`, 'success');
+                } catch (e) {
+                    log(`JSON解析失败: ${e.message}`, 'error');
+                }
+            } catch (error) {
+                log(`请求失败: ${error.message}`, 'error');
+                log(`错误详情: ${error.stack}`, 'error');
+            }
+        }
+
+        async function testLogin() {
+            clear();
+            log('测试登录接口...');
+
+            const loginData = {
+                username: 'tang',
+                password: 'tang123'
+            };
+
+            log(`请求数据: ${JSON.stringify(loginData, null, 2)}`);
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(loginData)
+                });
+
+                log(`状态码: ${response.status}`, response.ok ? 'success' : 'error');
+                log(`Content-Type: ${response.headers.get('content-type')}`);
+                log(`CORS头: Access-Control-Allow-Origin = ${response.headers.get('Access-Control-Allow-Origin')}`);
+
+                const text = await response.text();
+                log(`响应体长度: ${text.length} 字符`);
+                log(`响应体(文本): ${text}`);
+
+                if (text.length === 0) {
+                    log('⚠️ 响应体为空！这就是问题所在！', 'error');
+                    return;
+                }
+
+                try {
+                    const json = JSON.parse(text);
+                    log(`响应体(JSON): ${JSON.stringify(json, null, 2)}`, 'success');
+                } catch (e) {
+                    log(`JSON解析失败: ${e.message}`, 'error');
+                }
+            } catch (error) {
+                log(`请求失败: ${error.message}`, 'error');
+                log(`错误详情: ${error.stack}`, 'error');
+            }
+        }
+
+        async function testRegister() {
+            clear();
+            log('测试注册接口...');
+
+            const registerData = {
+                username: 'testuser' + Math.floor(Math.random() * 1000),
+                password: 'test123',
+                email: 'test@example.com',
+                phone: '13800138000',
+                realName: 'Test User'
+            };
+
+            log(`请求数据: ${JSON.stringify(registerData, null, 2)}`);
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(registerData)
+                });
+
+                log(`状态码: ${response.status}`, response.ok ? 'success' : 'error');
+
+                const text = await response.text();
+                log(`响应体(文本): ${text}`);
+
+                if (text.length === 0) {
+                    log('⚠️ 响应体为空！', 'error');
+                    return;
+                }
+
+                try {
+                    const json = JSON.parse(text);
+                    log(`响应体(JSON): ${JSON.stringify(json, null, 2)}`, 'success');
+                } catch (e) {
+                    log(`JSON解析失败: ${e.message}`, 'error');
+                }
+            } catch (error) {
+                log(`请求失败: ${error.message}`, 'error');
+            }
+        }
+
+        async function testCORS() {
+            clear();
+            log('测试CORS预检请求...');
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Access-Control-Request-Method': 'POST',
+                        'Access-Control-Request-Headers': 'content-type'
+                    }
+                });
+
+                log(`OPTIONS 状态码: ${response.status}`, response.ok ? 'success' : 'error');
+                log(`Allow: ${response.headers.get('Allow')}`);
+                log(`Access-Control-Allow-Origin: ${response.headers.get('Access-Control-Allow-Origin')}`);
+                log(`Access-Control-Allow-Methods: ${response.headers.get('Access-Control-Allow-Methods')}`);
+                log(`Access-Control-Allow-Headers: ${response.headers.get('Access-Control-Allow-Headers')}`);
+
+            } catch (error) {
+                log(`CORS测试失败: ${error.message}`, 'error');
+            }
+        }
+
+        // 页面加载时自动运行健康检查
+        window.addEventListener('load', () => {
+            setTimeout(testHealth, 500);
+        });
+    </script>
+</body>
+</html>

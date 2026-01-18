@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自动售货机管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 900px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .auth-forms {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-section {
+            flex: 1;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .form-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .dashboard {
+            display: none;
+        }
+
+        .dashboard.active {
+            display: block;
+        }
+
+        .auth-forms.hidden {
+            display: none;
+        }
+
+        .user-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .user-info h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .user-info p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .api-section {
+            margin-top: 30px;
+        }
+
+        .api-section h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .api-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .api-buttons button {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .api-buttons button:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .response-box {
+            background: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .response-box pre {
+            margin: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .logout-btn {
+            background: #dc3545;
+            margin-top: 20px;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .auth-forms {
+                flex-direction: column;
+            }
+
+            .api-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏪 自动售货机管理系统</h1>
+            <p>API 测试控制台</p>
+        </div>
+
+        <div class="content">
+            <!-- 认证表单 -->
+            <div class="auth-forms" id="authForms">
+                <!-- 登录表单 -->
+                <div class="form-section">
+                    <h2>登录</h2>
+                    <div class="message" id="loginMessage"></div>
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label>用户名</label>
+                            <input type="text" id="loginUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label>密码</label>
+                            <input type="password" id="loginPassword" required>
+                        </div>
+                        <button type="submit">登录</button>
+                    </form>
+                </div>
+
+                <!-- 注册表单 -->
+                <div class="form-section">
+                    <h2>注册</h2>
+                    <div class="message" id="registerMessage"></div>
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label>用户名</label>
+                            <input type="text" id="regUsername" required>
+                        </div>
+                        <div class="form-group">
+                            <label>密码</label>
+                            <input type="password" id="regPassword" required>
+                        </div>
+                        <div class="form-group">
+                            <label>邮箱</label>
+                            <input type="email" id="regEmail" required>
+                        </div>
+                        <div class="form-group">
+                            <label>手机号</label>
+                            <input type="tel" id="regPhone" required>
+                        </div>
+                        <div class="form-group">
+                            <label>真实姓名</label>
+                            <input type="text" id="regRealName" required>
+                        </div>
+                        <button type="submit">注册</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- 仪表板 -->
+            <div class="dashboard" id="dashboard">
+                <div class="user-info">
+                    <h3>👤 用户信息</h3>
+                    <p><strong>用户名:</strong> <span id="userInfoUsername"></span></p>
+                    <p><strong>真实姓名:</strong> <span id="userInfoRealName"></span></p>
+                    <p><strong>邮箱:</strong> <span id="userInfoEmail"></span></p>
+                    <p><strong>角色:</strong> <span id="userInfoRole"></span></p>
+                    <p style="margin-top: 10px; padding: 10px; background: white; border-radius: 4px; word-break: break-all;">
+                        <strong>Token:</strong><br>
+                        <code id="userInfoToken" style="font-size: 11px;"></code>
+                    </p>
+                </div>
+
+                <div class="api-section">
+                    <h3>📡 API 测试</h3>
+                    <div class="api-buttons">
+                        <button onclick="testAPI('devices')">获取设备列表</button>
+                        <button onclick="testAPI('analytics/sales-report?period=daily')">销售报表（日）</button>
+                        <button onclick="testAPI('analytics/sales-report?period=weekly')">销售报表（周）</button>
+                        <button onclick="testAPI('analytics/sales-trend')">销售趋势</button>
+                    </div>
+
+                    <div class="response-box">
+                        <pre id="responseOutput">点击上方按钮测试 API...</pre>
+                    </div>
+                </div>
+
+                <button class="logout-btn" onclick="logout()">退出登录</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8080/api';
+        let currentUser = null;
+        let token = null;
+
+        // 显示消息
+        function showMessage(elementId, message, isError = false) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = 'message ' + (isError ? 'error' : 'success');
+            element.style.display = 'block';
+
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        // 登录
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const text = await response.text();
+
+                if (response.ok) {
+                    try {
+                        const data = JSON.parse(text);
+                        currentUser = data.user;
+                        token = data.token;
+                        showDashboard();
+                        showMessage('loginMessage', '登录成功！');
+                    } catch (e) {
+                        showMessage('loginMessage', '响应格式错误', true);
+                    }
+                } else {
+                    let errorMsg = '登录失败';
+                    try {
+                        const data = JSON.parse(text);
+                        errorMsg = data.message || errorMsg;
+                    } catch (e) {
+                        if (text) errorMsg = text;
+                    }
+                    showMessage('loginMessage', errorMsg, true);
+                }
+            } catch (error) {
+                showMessage('loginMessage', '网络错误: ' + error.message, true);
+            }
+        });
+
+        // 注册
+        document.getElementById('registerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const username = document.getElementById('regUsername').value;
+            const password = document.getElementById('regPassword').value;
+            const email = document.getElementById('regEmail').value;
+            const phone = document.getElementById('regPhone').value;
+            const realName = document.getElementById('regRealName').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username,
+                        password,
+                        email,
+                        phone,
+                        realName
+                    })
+                });
+
+                const text = await response.text();
+
+                if (response.ok) {
+                    showMessage('registerMessage', '注册成功！请登录');
+                    document.getElementById('registerForm').reset();
+                } else {
+                    let errorMsg = '注册失败';
+                    try {
+                        const data = JSON.parse(text);
+                        errorMsg = data.message || errorMsg;
+                    } catch (e) {
+                        if (text) errorMsg = text;
+                    }
+                    showMessage('registerMessage', errorMsg, true);
+                }
+            } catch (error) {
+                showMessage('registerMessage', '网络错误: ' + error.message, true);
+            }
+        });
+
+        // 显示仪表板
+        function showDashboard() {
+            document.getElementById('authForms').classList.add('hidden');
+            document.getElementById('dashboard').classList.add('active');
+
+            document.getElementById('userInfoUsername').textContent = currentUser.username;
+            document.getElementById('userInfoRealName').textContent = currentUser.realName;
+            document.getElementById('userInfoEmail').textContent = currentUser.email;
+            document.getElementById('userInfoRole').textContent = currentUser.role;
+            document.getElementById('userInfoToken').textContent = token;
+        }
+
+        // 退出登录
+        function logout() {
+            currentUser = null;
+            token = null;
+            document.getElementById('authForms').classList.remove('hidden');
+            document.getElementById('dashboard').classList.remove('active');
+            document.getElementById('responseOutput').textContent = '点击上方按钮测试 API...';
+        }
+
+        // 测试 API
+        async function testAPI(endpoint) {
+            const output = document.getElementById('responseOutput');
+
+            if (!token) {
+                output.textContent = '请先登录！';
+                return;
+            }
+
+            output.textContent = '正在请求...';
+
+            try {
+                const response = await fetch(`${API_BASE}/${endpoint}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                // 检查响应是否为空
+                const text = await response.text();
+
+                if (!response.ok) {
+                    if (response.status === 403) {
+                        output.textContent = '错误: 权限不足 (403)\n\n可能原因:\n1. Token 已过期，请重新登录\n2. 账号权限不足';
+                    } else if (response.status === 401) {
+                        output.textContent = '错误: 未认证 (401)\n\n请先登录';
+                    } else {
+                        output.textContent = `错误: HTTP ${response.status}\n\n` + (text || '无响应内容');
+                    }
+                    return;
+                }
+
+                // 如果响应为空
+                if (!text || text.trim() === '') {
+                    output.textContent = '查询成功 (无数据)\n\n数据库中没有相关记录';
+                    return;
+                }
+
+                // 尝试解析 JSON
+                try {
+                    const data = JSON.parse(text);
+                    output.textContent = JSON.stringify(data, null, 2);
+                } catch (e) {
+                    output.textContent = '查询成功 (非JSON响应)\n\n' + text;
+                }
+            } catch (error) {
+                output.textContent = '请求失败: ' + error.message + '\n\n请检查:\n1. 后端服务是否正常运行\n2. 浏览器控制台是否有详细错误';
+            }
+        }
+
+        // 页面加载时检查健康状态
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(`${API_BASE}/auth/health`);
+                if (response.ok) {
+                    console.log('API 服务正常运行');
+                } else {
+                    console.warn('API 服务可能未正常启动');
+                }
+            } catch (error) {
+                console.error('无法连接到 API 服务:', error);
+            }
+        });
+    </script>
+</body>
+</html>
