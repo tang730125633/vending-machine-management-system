@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>订单管理 - 智能售货机管理系统</title>
+    <style>
+        :root {
+            --primary-color: #f97316;
+            --secondary-color: #c2410c;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .stat-card-icon {
+            font-size: 32px;
+        }
+
+        .stat-card-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .stat-card-label {
+            color: #999;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .filter-container {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: flex-end;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .btn-demo {
+            background: linear-gradient(135deg, var(--success-color) 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-demo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: #f8f9fa;
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #dee2e6;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        tbody td {
+            padding: 15px 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .order-no {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-family: monospace;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-refunded {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-wechat {
+            background: #d4f4dd;
+            color: #0d7221;
+        }
+
+        .badge-alipay {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .badge-card {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .badge-cash {
+            background: #ffeeba;
+            color: #856404;
+        }
+
+        .amount {
+            color: var(--danger-color);
+            font-weight: 700;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .pagination button {
+            padding: 8px 15px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pagination button:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination .active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        @media (max-width: 768px) {
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-row {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📦 订单管理</h1>
+        <p>查看和管理所有订单信息</p>
+    </div>
+
+    <div id="alertBox" class="alert"></div>
+
+    <!-- 统计卡片 -->
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-card-icon">📊</div>
+            </div>
+            <div class="stat-card-value" id="totalOrders">0</div>
+            <div class="stat-card-label">总订单数</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-card-icon">💰</div>
+            </div>
+            <div class="stat-card-value" id="totalRevenue">¥0</div>
+            <div class="stat-card-label">总销售额</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-card-icon">📈</div>
+            </div>
+            <div class="stat-card-value" id="todayOrders">0</div>
+            <div class="stat-card-label">今日订单</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-card-header">
+                <div class="stat-card-icon">⏰</div>
+            </div>
+            <div class="stat-card-value" id="pendingOrders">0</div>
+            <div class="stat-card-label">待处理</div>
+        </div>
+    </div>
+
+    <!-- 筛选条件 -->
+    <div class="filter-container">
+        <div class="filter-row">
+            <div class="filter-group">
+                <label>开始日期</label>
+                <input type="date" id="startDate">
+            </div>
+            <div class="filter-group">
+                <label>结束日期</label>
+                <input type="date" id="endDate">
+            </div>
+            <div class="filter-group">
+                <label>订单状态</label>
+                <select id="orderStatus">
+                    <option value="">全部状态</option>
+                    <option value="PAID">已支付</option>
+                    <option value="PENDING">待支付</option>
+                    <option value="REFUNDED">已退款</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>支付方式</label>
+                <select id="paymentMethod">
+                    <option value="">全部方式</option>
+                    <option value="WECHAT">微信支付</option>
+                    <option value="ALIPAY">支付宝</option>
+                    <option value="CARD">银行卡</option>
+                    <option value="CASH">现金</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="filterOrders()">查询</button>
+                <button class="btn btn-success" onclick="exportOrders()">导出Excel</button>
+                <button class="btn btn-demo" onclick="enterDemoMode()">🚀 演示模式</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 订单列表 -->
+    <div class="table-container">
+        <div id="tableContent">
+            <!-- 表格内容将通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <script>
+        let isDemoMode = false;
+        let currentPage = 1;
+        const pageSize = 10;
+
+        // 演示数据
+        const demoOrders = [
+            { orderNo: 'VM20260118001', time: '2026-01-18 09:15:30', product: '可口可乐', quantity: 2, amount: 6.00, payment: 'WECHAT', status: 'PAID', device: '设备001' },
+            { orderNo: 'VM20260118002', time: '2026-01-18 09:45:12', product: '雪碧', quantity: 1, amount: 3.00, payment: 'ALIPAY', status: 'PAID', device: '设备002' },
+            { orderNo: 'VM20260118003', time: '2026-01-18 10:20:45', product: '农夫山泉', quantity: 3, amount: 4.50, payment: 'WECHAT', status: 'PAID', device: '设备001' },
+            { orderNo: 'VM20260118004', time: '2026-01-18 10:55:20', product: '红牛', quantity: 1, amount: 6.50, payment: 'CASH', status: 'PAID', device: '设备003' },
+            { orderNo: 'VM20260118005', time: '2026-01-18 11:30:18', product: '脉动', quantity: 2, amount: 10.00, payment: 'ALIPAY', status: 'PAID', device: '设备002' },
+            { orderNo: 'VM20260118006', time: '2026-01-18 12:10:33', product: '康师傅冰红茶', quantity: 1, amount: 3.50, payment: 'WECHAT', status: 'PAID', device: '设备001' },
+            { orderNo: 'VM20260118007', time: '2026-01-18 13:25:40', product: '雀巢咖啡', quantity: 2, amount: 12.00, payment: 'CARD', status: 'PAID', device: '设备004' },
+            { orderNo: 'VM20260118008', time: '2026-01-18 14:05:55', product: '可乐', quantity: 1, amount: 3.00, payment: 'WECHAT', status: 'PENDING', device: '设备002' },
+            { orderNo: 'VM20260118009', time: '2026-01-18 14:40:22', product: '矿泉水', quantity: 5, amount: 7.50, payment: 'ALIPAY', status: 'PAID', device: '设备003' },
+            { orderNo: 'VM20260118010', time: '2026-01-18 15:15:10', product: '怡宝', quantity: 2, amount: 4.00, payment: 'WECHAT', status: 'PAID', device: '设备001' }
+        ];
+
+        // 进入演示模式
+        function enterDemoMode() {
+            isDemoMode = true;
+            showAlert('演示模式已启用，所有操作将使用模拟数据', 'success');
+            renderTable(demoOrders);
+            updateStats();
+        }
+
+        // 渲染表格
+        function renderTable(data) {
+            const tableContent = document.getElementById('tableContent');
+
+            if (data.length === 0) {
+                tableContent.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>暂无订单数据</h3>
+                        <p>没有找到符合条件的订单</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>订单号</th>
+                            <th>下单时间</th>
+                            <th>商品名称</th>
+                            <th>数量</th>
+                            <th>订单金额</th>
+                            <th>支付方式</th>
+                            <th>订单状态</th>
+                            <th>设备</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach(order => {
+                const paymentBadge = getPaymentBadge(order.payment);
+                const statusBadge = getStatusBadge(order.status);
+
+                tableHTML += `
+                    <tr>
+                        <td><span class="order-no">${order.orderNo}</span></td>
+                        <td>${order.time}</td>
+                        <td>${order.product}</td>
+                        <td>${order.quantity}</td>
+                        <td><span class="amount">¥${order.amount.toFixed(2)}</span></td>
+                        <td>${paymentBadge}</td>
+                        <td>${statusBadge}</td>
+                        <td>${order.device}</td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+
+            tableContent.innerHTML = tableHTML;
+        }
+
+        // 获取支付方式徽章
+        function getPaymentBadge(payment) {
+            const badges = {
+                'WECHAT': '<span class="badge badge-wechat">微信支付</span>',
+                'ALIPAY': '<span class="badge badge-alipay">支付宝</span>',
+                'CARD': '<span class="badge badge-card">银行卡</span>',
+                'CASH': '<span class="badge badge-cash">现金</span>'
+            };
+            return badges[payment] || payment;
+        }
+
+        // 获取状态徽章
+        function getStatusBadge(status) {
+            const badges = {
+                'PAID': '<span class="badge badge-paid">已支付</span>',
+                'PENDING': '<span class="badge badge-pending">待支付</span>',
+                'REFUNDED': '<span class="badge badge-refunded">已退款</span>'
+            };
+            return badges[status] || status;
+        }
+
+        // 更新统计数据
+        function updateStats() {
+            const totalOrders = demoOrders.length;
+            const totalRevenue = demoOrders.reduce((sum, order) => sum + order.amount, 0);
+            const todayOrders = demoOrders.filter(o => o.time.startsWith('2026-01-18')).length;
+            const pendingOrders = demoOrders.filter(o => o.status === 'PENDING').length;
+
+            document.getElementById('totalOrders').textContent = totalOrders;
+            document.getElementById('totalRevenue').textContent = '¥' + totalRevenue.toFixed(2);
+            document.getElementById('todayOrders').textContent = todayOrders;
+            document.getElementById('pendingOrders').textContent = pendingOrders;
+        }
+
+        // 筛选订单
+        function filterOrders() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const status = document.getElementById('orderStatus').value;
+            const payment = document.getElementById('paymentMethod').value;
+
+            let filtered = demoOrders;
+
+            if (startDate) {
+                filtered = filtered.filter(o => o.time >= startDate);
+            }
+
+            if (endDate) {
+                filtered = filtered.filter(o => o.time <= endDate + ' 23:59:59');
+            }
+
+            if (status) {
+                filtered = filtered.filter(o => o.status === status);
+            }
+
+            if (payment) {
+                filtered = filtered.filter(o => o.payment === payment);
+            }
+
+            renderTable(filtered);
+            showAlert(`找到 ${filtered.length} 条订单`, 'success');
+        }
+
+        // 导出Excel
+        function exportOrders() {
+            if (isDemoMode) {
+                showAlert('演示模式：订单数据导出成功（模拟）', 'success');
+            } else {
+                // 真实模式：调用导出API
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+
+                window.location.href = `/api/orders/export?startDate=${startDate}&endDate=${endDate}`;
+                showAlert('正在导出订单数据...', 'success');
+            }
+        }
+
+        // 显示提示信息
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = 'alert alert-' + type;
+            alertBox.style.display = 'block';
+
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('load', function() {
+            // 设置默认日期（最近7天）
+            const today = new Date();
+            const sevenDaysAgo = new Date(today);
+            sevenDaysAgo.setDate(today.getDate() - 7);
+
+            document.getElementById('endDate').valueAsDate = today;
+            document.getElementById('startDate').valueAsDate = sevenDaysAgo;
+
+            // 自动进入演示模式
+            enterDemoMode();
+        });
+    </script>
+</body>
+</html>

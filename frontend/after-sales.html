@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>售后管理 - 智能售货机管理系统</title>
+    <style>
+        :root {
+            --primary-color: #f97316;
+            --secondary-color: #c2410c;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .toolbar {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-demo {
+            background: linear-gradient(135deg, var(--success-color) 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-demo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: #f8f9fa;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #dee2e6;
+            font-size: 13px;
+        }
+
+        tbody td {
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 13px;
+            color: #666;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-processing {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .badge-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-refund {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .badge-exchange {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .badge-complaint {
+            background: #e2e3e5;
+            color: #383d41;
+        }
+
+        .form-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .form-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .required {
+            color: var(--danger-color);
+            margin-left: 4px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* 图片上传区域 ⭐ 核心功能 */
+        .upload-area {
+            border: 2px dashed #d0d0d0;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .upload-hint {
+            color: #999;
+            font-size: 12px;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* 图片预览网格 */
+        .image-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .image-preview-item {
+            position: relative;
+            padding-top: 100%;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 2px solid #e0e0e0;
+            background: #f8f9fa;
+        }
+
+        .image-preview-item img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .image-remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 24px;
+            height: 24px;
+            background: rgba(220, 53, 69, 0.9);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 22px;
+            transition: all 0.3s;
+        }
+
+        .image-remove-btn:hover {
+            background: var(--danger-color);
+            transform: scale(1.1);
+        }
+
+        .image-count {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            margin-top: 10px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .view-btn {
+            padding: 5px 12px;
+            font-size: 12px;
+            background: var(--info-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .view-btn:hover {
+            background: #138496;
+        }
+
+        @media (max-width: 1024px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🎫 售后管理</h1>
+        <p>处理客户售后申请，查看凭证图片</p>
+    </div>
+
+    <div class="toolbar">
+        <h3>售后列表</h3>
+        <button class="btn btn-demo" onclick="enterDemoMode()">
+            🚀 进入演示模式
+        </button>
+    </div>
+
+    <div id="alertBox" class="alert"></div>
+
+    <div class="content-grid">
+        <!-- 左侧：售后列表 -->
+        <div class="table-container">
+            <div id="tableContent">
+                <!-- 表格内容将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 右侧：售后申请表单 -->
+        <div class="form-panel">
+            <div class="form-title">📝 申请售后</div>
+
+            <form id="afterSalesForm">
+                <div class="form-group">
+                    <label>订单号<span class="required">*</span></label>
+                    <input type="text" id="orderNo" placeholder="请输入订单号" required>
+                </div>
+
+                <div class="form-group">
+                    <label>售后类型<span class="required">*</span></label>
+                    <select id="afterSalesType" required>
+                        <option value="">请选择</option>
+                        <option value="REFUND">退款</option>
+                        <option value="EXCHANGE">换货</option>
+                        <option value="COMPLAINT">投诉</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>问题描述<span class="required">*</span></label>
+                    <textarea id="description" placeholder="请详细描述您遇到的问题" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>上传凭证图片（最多9张）⭐</label>
+
+                    <!-- 图片上传区域 -->
+                    <div class="upload-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                        <div class="upload-icon">📷</div>
+                        <div class="upload-text">点击或拖拽图片到此处上传</div>
+                        <div class="upload-hint">支持JPG、PNG、GIF格式，单张图片不超过5MB</div>
+                    </div>
+                    <input type="file" id="fileInput" multiple accept="image/*" onchange="handleFileSelect(event)">
+
+                    <!-- 图片预览网格 -->
+                    <div class="image-preview-grid" id="imagePreviewGrid">
+                        <!-- 图片预览将动态添加 -->
+                    </div>
+                    <div class="image-count" id="imageCount">已上传 0/9 张</div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                    提交售后申请
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        let isDemoMode = false;
+        let uploadedImages = [];
+        const maxImages = 9;
+
+        // 演示数据
+        const demoAfterSales = [
+            { id: 1, orderNo: 'VM20260118001', type: 'REFUND', status: 'PENDING', description: '商品过期', images: 3, createTime: '2026-01-18 10:30' },
+            { id: 2, orderNo: 'VM20260118005', type: 'EXCHANGE', status: 'PROCESSING', description: '商品破损', images: 5, createTime: '2026-01-18 11:15' },
+            { id: 3, orderNo: 'VM20260118003', type: 'COMPLAINT', status: 'COMPLETED', description: '设备故障未出货', images: 2, createTime: '2026-01-18 09:20' }
+        ];
+
+        // 进入演示模式
+        function enterDemoMode() {
+            isDemoMode = true;
+            showAlert('演示模式已启用，所有操作将使用模拟数据', 'success');
+            renderTable(demoAfterSales);
+        }
+
+        // 渲染表格
+        function renderTable(data) {
+            const tableContent = document.getElementById('tableContent');
+
+            if (data.length === 0) {
+                tableContent.innerHTML = '<div style="text-align:center;padding:40px;color:#999;">暂无售后记录</div>';
+                return;
+            }
+
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>售后单号</th>
+                            <th>订单号</th>
+                            <th>售后类型</th>
+                            <th>状态</th>
+                            <th>图片数量</th>
+                            <th>申请时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach(item => {
+                const typeLabel = getTypeLabel(item.type);
+                const statusBadge = getStatusBadge(item.status);
+
+                tableHTML += `
+                    <tr>
+                        <td><strong>AS${String(item.id).padStart(6, '0')}</strong></td>
+                        <td>${item.orderNo}</td>
+                        <td>${typeLabel}</td>
+                        <td>${statusBadge}</td>
+                        <td>📷 ${item.images} 张</td>
+                        <td>${item.createTime}</td>
+                        <td><button class="view-btn" onclick="viewDetail(${item.id})">查看</button></td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += '</tbody></table>';
+            tableContent.innerHTML = tableHTML;
+        }
+
+        // 获取类型标签
+        function getTypeLabel(type) {
+            const labels = {
+                'REFUND': '<span class="badge badge-refund">退款</span>',
+                'EXCHANGE': '<span class="badge badge-exchange">换货</span>',
+                'COMPLAINT': '<span class="badge badge-complaint">投诉</span>'
+            };
+            return labels[type] || type;
+        }
+
+        // 获取状态徽章
+        function getStatusBadge(status) {
+            const badges = {
+                'PENDING': '<span class="badge badge-pending">待审核</span>',
+                'PROCESSING': '<span class="badge badge-processing">处理中</span>',
+                'COMPLETED': '<span class="badge badge-completed">已完成</span>'
+            };
+            return badges[status] || status;
+        }
+
+        // 查看详情
+        function viewDetail(id) {
+            const item = demoAfterSales.find(a => a.id === id);
+            if (item) {
+                alert(`售后详情\n\n订单号：${item.orderNo}\n类型：${item.type}\n描述：${item.description}\n图片数量：${item.images}张`);
+            }
+        }
+
+        // ==================== 图片上传功能 ⭐ ====================
+
+        // 拖拽上传
+        const uploadArea = document.getElementById('uploadArea');
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        // 文件选择
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            handleFiles(files);
+        }
+
+        // 处理文件
+        function handleFiles(files) {
+            if (uploadedImages.length >= maxImages) {
+                showAlert('最多只能上传9张图片', 'danger');
+                return;
+            }
+
+            Array.from(files).forEach(file => {
+                // 验证文件类型
+                if (!file.type.startsWith('image/')) {
+                    showAlert('只能上传图片文件', 'danger');
+                    return;
+                }
+
+                // 验证文件大小（5MB）
+                if (file.size > 5 * 1024 * 1024) {
+                    showAlert('图片大小不能超过5MB', 'danger');
+                    return;
+                }
+
+                // 检查数量限制
+                if (uploadedImages.length >= maxImages) {
+                    showAlert('最多只能上传9张图片', 'danger');
+                    return;
+                }
+
+                // 读取图片
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    uploadedImages.push({
+                        file: file,
+                        dataUrl: e.target.result
+                    });
+                    renderImagePreview();
+                    updateImageCount();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // 渲染图片预览
+        function renderImagePreview() {
+            const grid = document.getElementById('imagePreviewGrid');
+            grid.innerHTML = '';
+
+            uploadedImages.forEach((image, index) => {
+                const item = document.createElement('div');
+                item.className = 'image-preview-item';
+                item.innerHTML = `
+                    <img src="${image.dataUrl}" alt="预览图${index + 1}">
+                    <button class="image-remove-btn" onclick="removeImage(${index})">×</button>
+                `;
+                grid.appendChild(item);
+            });
+        }
+
+        // 删除图片
+        function removeImage(index) {
+            uploadedImages.splice(index, 1);
+            renderImagePreview();
+            updateImageCount();
+        }
+
+        // 更新图片计数
+        function updateImageCount() {
+            const count = document.getElementById('imageCount');
+            count.textContent = `已上传 ${uploadedImages.length}/${maxImages} 张`;
+
+            if (uploadedImages.length >= maxImages) {
+                uploadArea.style.display = 'none';
+            } else {
+                uploadArea.style.display = 'block';
+            }
+        }
+
+        // ==================== 表单提交 ====================
+
+        document.getElementById('afterSalesForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const orderNo = document.getElementById('orderNo').value.trim();
+            const type = document.getElementById('afterSalesType').value;
+            const description = document.getElementById('description').value.trim();
+
+            if (!orderNo || !type || !description) {
+                showAlert('请填写所有必填项', 'danger');
+                return;
+            }
+
+            if (uploadedImages.length === 0) {
+                showAlert('建议上传凭证图片以便快速处理', 'danger');
+            }
+
+            if (isDemoMode) {
+                // 演示模式
+                showAlert(`售后申请提交成功！\n订单号：${orderNo}\n类型：${type}\n图片数量：${uploadedImages.length}张`, 'success');
+
+                // 添加到列表
+                const newItem = {
+                    id: demoAfterSales.length + 1,
+                    orderNo: orderNo,
+                    type: type,
+                    status: 'PENDING',
+                    description: description,
+                    images: uploadedImages.length,
+                    createTime: new Date().toLocaleString('zh-CN')
+                };
+                demoAfterSales.unshift(newItem);
+                renderTable(demoAfterSales);
+
+                // 清空表单
+                this.reset();
+                uploadedImages = [];
+                renderImagePreview();
+                updateImageCount();
+            } else {
+                // 真实模式：调用API上传
+                const formData = new FormData();
+                formData.append('orderNo', orderNo);
+                formData.append('type', type);
+                formData.append('description', description);
+
+                // 添加图片文件
+                uploadedImages.forEach((image, index) => {
+                    formData.append('images', image.file);
+                });
+
+                fetch('/api/after-sales', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token')
+                    },
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    showAlert('售后申请提交成功', 'success');
+                    // 刷新列表
+                    loadAfterSales();
+                    // 清空表单
+                    this.reset();
+                    uploadedImages = [];
+                    renderImagePreview();
+                    updateImageCount();
+                })
+                .catch(error => {
+                    showAlert('提交失败：' + error.message, 'danger');
+                });
+            }
+        });
+
+        // 显示提示信息
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = 'alert alert-' + type;
+            alertBox.style.display = 'block';
+
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('load', function() {
+            enterDemoMode();
+        });
+    </script>
+</body>
+</html>

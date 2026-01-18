@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户审核 - 智能售货机管理系统</title>
+    <style>
+        :root {
+            --primary-color: #f97316;
+            --secondary-color: #c2410c;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .toolbar {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .stats {
+            display: flex;
+            gap: 30px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-demo {
+            background: linear-gradient(135deg, var(--success-color) 0%, #20c997 100%);
+            color: white;
+        }
+
+        .btn-demo:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        .table-container {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead th {
+            background: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #dee2e6;
+            font-size: 14px;
+        }
+
+        tbody td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+            color: #666;
+        }
+
+        tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .badge-customer {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .badge-operator {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .badge-technician {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .badge-admin {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-sm {
+            padding: 6px 14px;
+            font-size: 13px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .btn-approve {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .btn-approve:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+
+        .btn-reject {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-reject:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            color: #333;
+            font-size: 22px;
+        }
+
+        .modal-body {
+            margin-bottom: 20px;
+        }
+
+        .user-detail {
+            margin: 15px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .user-detail label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .user-detail span {
+            color: #333;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-cancel {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-cancel:hover {
+            background: #5a6268;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🤖 用户审核管理</h1>
+        <p>审核用户注册申请，管理用户权限</p>
+    </div>
+
+    <div id="alertBox" class="alert"></div>
+
+    <div class="toolbar">
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="totalPending">0</div>
+                <div class="stat-label">待审核</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalApproved">0</div>
+                <div class="stat-label">已通过</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="totalRejected">0</div>
+                <div class="stat-label">已拒绝</div>
+            </div>
+        </div>
+        <button class="btn btn-demo" onclick="enterDemoMode()">
+            🚀 进入演示模式
+        </button>
+    </div>
+
+    <div class="table-container">
+        <div id="tableContent">
+            <!-- 表格内容将通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <!-- 审核详情模态框 -->
+    <div id="approvalModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">用户审核</h2>
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- 用户详情将动态填充 -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-sm btn-cancel" onclick="closeModal()">取消</button>
+                <button class="btn btn-sm btn-reject" onclick="confirmReject()">拒绝</button>
+                <button class="btn btn-sm btn-approve" onclick="confirmApprove()">通过</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let isDemoMode = false;
+        let currentUser = null;
+
+        // 演示数据
+        const demoData = [
+            {
+                id: 1,
+                username: 'zhangsan',
+                realName: '张三',
+                email: 'zhangsan@example.com',
+                phone: '13800138001',
+                role: 'OPERATOR',
+                status: 'PENDING',
+                applyTime: '2026-01-18 09:30:15'
+            },
+            {
+                id: 2,
+                username: 'lisi',
+                realName: '李四',
+                email: 'lisi@example.com',
+                phone: '13800138002',
+                role: 'TECHNICIAN',
+                status: 'PENDING',
+                applyTime: '2026-01-18 10:15:30'
+            },
+            {
+                id: 3,
+                username: 'wangwu',
+                realName: '王五',
+                email: 'wangwu@example.com',
+                phone: '13800138003',
+                role: 'CUSTOMER',
+                status: 'PENDING',
+                applyTime: '2026-01-18 11:20:45'
+            },
+            {
+                id: 4,
+                username: 'zhaoliu',
+                realName: '赵六',
+                email: 'zhaoliu@example.com',
+                phone: '13800138004',
+                role: 'ADMIN',
+                status: 'PENDING',
+                applyTime: '2026-01-18 14:05:12'
+            }
+        ];
+
+        // 进入演示模式
+        function enterDemoMode() {
+            isDemoMode = true;
+            showAlert('演示模式已启用，所有操作将使用模拟数据', 'success');
+            renderTable(demoData);
+            updateStats();
+        }
+
+        // 渲染表格
+        function renderTable(data) {
+            const tableContent = document.getElementById('tableContent');
+
+            if (data.length === 0) {
+                tableContent.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>暂无待审核用户</h3>
+                        <p>当前没有需要审核的用户注册申请</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let tableHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>用户名</th>
+                            <th>真实姓名</th>
+                            <th>邮箱</th>
+                            <th>手机号</th>
+                            <th>申请角色</th>
+                            <th>申请时间</th>
+                            <th>状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            data.forEach(user => {
+                const roleLabel = getRoleLabel(user.role);
+                const roleBadgeClass = getRoleBadgeClass(user.role);
+
+                tableHTML += `
+                    <tr>
+                        <td><strong>${user.username}</strong></td>
+                        <td>${user.realName}</td>
+                        <td>${user.email}</td>
+                        <td>${user.phone}</td>
+                        <td><span class="badge ${roleBadgeClass}">${roleLabel}</span></td>
+                        <td>${user.applyTime}</td>
+                        <td><span class="badge badge-pending">待审核</span></td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn-sm btn-approve" onclick="openApprovalModal(${user.id}, 'approve')">
+                                    通过
+                                </button>
+                                <button class="btn-sm btn-reject" onclick="openApprovalModal(${user.id}, 'reject')">
+                                    拒绝
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tableHTML += `
+                    </tbody>
+                </table>
+            `;
+
+            tableContent.innerHTML = tableHTML;
+        }
+
+        // 获取角色标签
+        function getRoleLabel(role) {
+            const roleMap = {
+                'CUSTOMER': '客户',
+                'OPERATOR': '运营人员',
+                'TECHNICIAN': '技术人员',
+                'ADMIN': '管理员',
+                'SUPER_ADMIN': '超级管理员'
+            };
+            return roleMap[role] || role;
+        }
+
+        // 获取角色徽章样式
+        function getRoleBadgeClass(role) {
+            const classMap = {
+                'CUSTOMER': 'badge-customer',
+                'OPERATOR': 'badge-operator',
+                'TECHNICIAN': 'badge-technician',
+                'ADMIN': 'badge-admin',
+                'SUPER_ADMIN': 'badge-admin'
+            };
+            return classMap[role] || 'badge-customer';
+        }
+
+        // 打开审核模态框
+        function openApprovalModal(userId, action) {
+            currentUser = demoData.find(u => u.id === userId);
+            if (!currentUser) return;
+
+            const modalTitle = document.getElementById('modalTitle');
+            const modalBody = document.getElementById('modalBody');
+
+            modalTitle.textContent = action === 'approve' ? '审核通过确认' : '拒绝确认';
+
+            modalBody.innerHTML = `
+                <div class="user-detail">
+                    <label>用户名：</label>
+                    <span>${currentUser.username}</span>
+                </div>
+                <div class="user-detail">
+                    <label>真实姓名：</label>
+                    <span>${currentUser.realName}</span>
+                </div>
+                <div class="user-detail">
+                    <label>邮箱：</label>
+                    <span>${currentUser.email}</span>
+                </div>
+                <div class="user-detail">
+                    <label>手机号：</label>
+                    <span>${currentUser.phone}</span>
+                </div>
+                <div class="user-detail">
+                    <label>申请角色：</label>
+                    <span>${getRoleLabel(currentUser.role)}</span>
+                </div>
+                <div class="user-detail">
+                    <label>申请时间：</label>
+                    <span>${currentUser.applyTime}</span>
+                </div>
+            `;
+
+            document.getElementById('approvalModal').style.display = 'block';
+
+            // 根据操作类型显示/隐藏按钮
+            const approveBtn = document.querySelector('.btn-approve');
+            const rejectBtn = document.querySelector('.btn-reject');
+
+            if (action === 'approve') {
+                approveBtn.style.display = 'inline-block';
+                rejectBtn.style.display = 'none';
+            } else {
+                approveBtn.style.display = 'none';
+                rejectBtn.style.display = 'inline-block';
+            }
+        }
+
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById('approvalModal').style.display = 'none';
+            currentUser = null;
+        }
+
+        // 确认通过
+        function confirmApprove() {
+            if (!currentUser) return;
+
+            if (isDemoMode) {
+                // 演示模式
+                showAlert(`用户"${currentUser.username}"审核通过，账号已激活`, 'success');
+                removeUserFromList(currentUser.id);
+                closeModal();
+                updateStats();
+            } else {
+                // 真实模式：调用API
+                fetch(`/api/admin/users/${currentUser.id}/approve`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    showAlert('审核通过成功', 'success');
+                    loadPendingUsers();
+                    closeModal();
+                })
+                .catch(error => {
+                    showAlert('审核失败：' + error.message, 'danger');
+                });
+            }
+        }
+
+        // 确认拒绝
+        function confirmReject() {
+            if (!currentUser) return;
+
+            if (isDemoMode) {
+                // 演示模式
+                showAlert(`用户"${currentUser.username}"已被拒绝`, 'success');
+                removeUserFromList(currentUser.id);
+                closeModal();
+                updateStats();
+            } else {
+                // 真实模式：调用API
+                fetch(`/api/admin/users/${currentUser.id}/reject`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + localStorage.getItem('token'),
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ reason: '不符合申请条件' })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    showAlert('已拒绝该用户', 'success');
+                    loadPendingUsers();
+                    closeModal();
+                })
+                .catch(error => {
+                    showAlert('操作失败：' + error.message, 'danger');
+                });
+            }
+        }
+
+        // 从列表中移除用户
+        function removeUserFromList(userId) {
+            const index = demoData.findIndex(u => u.id === userId);
+            if (index > -1) {
+                demoData.splice(index, 1);
+                renderTable(demoData);
+            }
+        }
+
+        // 更新统计数据
+        function updateStats() {
+            const pending = demoData.filter(u => u.status === 'PENDING').length;
+            document.getElementById('totalPending').textContent = pending;
+            document.getElementById('totalApproved').textContent = Math.floor(Math.random() * 50) + 20;
+            document.getElementById('totalRejected').textContent = Math.floor(Math.random() * 10) + 3;
+        }
+
+        // 显示提示信息
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = 'alert alert-' + type;
+            alertBox.style.display = 'block';
+
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // 加载待审核用户（真实模式）
+        function loadPendingUsers() {
+            fetch('/api/admin/users/pending', {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + localStorage.getItem('token')
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                renderTable(data);
+                updateStats();
+            })
+            .catch(error => {
+                console.error('加载失败：', error);
+                showAlert('加载数据失败，请刷新页面重试', 'danger');
+            });
+        }
+
+        // 页面加载时初始化
+        window.addEventListener('load', function() {
+            // 检查是否有token
+            const token = localStorage.getItem('token');
+            if (!token) {
+                // 如果没有token，自动进入演示模式
+                enterDemoMode();
+            } else {
+                // 如果有token，加载真实数据
+                loadPendingUsers();
+            }
+        });
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            const modal = document.getElementById('approvalModal');
+            if (event.target === modal) {
+                closeModal();
+            }
+        }
+    </script>
+</body>
+</html>
