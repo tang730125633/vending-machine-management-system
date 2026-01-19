@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的售后 - 智能售货机管理系统</title>
+    <style>
+        :root {
+            --primary-color: #f97316;
+            --secondary-color: #c2410c;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(249, 115, 22, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(249, 115, 22, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            box-shadow: 0 4px 15px rgba(108, 117, 125, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+        }
+
+        .aftersales-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .aftersales-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+
+        .aftersales-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .aftersales-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 15px;
+        }
+
+        .aftersales-number {
+            font-size: 14px;
+            color: #666;
+            font-weight: 600;
+        }
+
+        .aftersales-time {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .aftersales-body {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .aftersales-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+
+        .aftersales-label {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .aftersales-value {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .aftersales-description {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+
+        .aftersales-images {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .aftersales-image {
+            width: 100%;
+            height: 80px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .aftersales-image:hover {
+            transform: scale(1.05);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-processing {
+            background: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .status-completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .apply-form {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 20px;
+        }
+
+        .apply-form h3 {
+            color: #333;
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #666;
+            font-size: 13px;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group select,
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group select:focus,
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .upload-area {
+            border: 2px dashed #d0d0d0;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #f8f9fa;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background: #fff;
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary-color);
+            background: rgba(249, 115, 22, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .upload-text {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .upload-hint {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .preview-item {
+            position: relative;
+            width: 100%;
+            height: 80px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+        }
+
+        .preview-remove {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 24px;
+            height: 24px;
+            background: var(--danger-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .preview-remove:hover {
+            transform: scale(1.2);
+        }
+
+        .empty-state {
+            background: white;
+            border-radius: 12px;
+            padding: 60px 20px;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-state .icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state p {
+            color: #999;
+            font-size: 16px;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .apply-form {
+                position: static;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 页面头部 -->
+        <div class="header">
+            <h1>🔧 我的售后</h1>
+            <div style="display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="window.location.href='customer-home.html'">返回首页</button>
+                <button class="btn btn-secondary" onclick="window.location.href='customer-orders.html'">我的订单</button>
+            </div>
+        </div>
+
+        <!-- 主要内容 -->
+        <div class="content-grid">
+            <!-- 售后列表 -->
+            <div>
+                <div class="aftersales-list" id="aftersalesList">
+                    <!-- 售后卡片将通过JS动态生成 -->
+                </div>
+
+                <!-- 空状态 -->
+                <div class="empty-state" id="emptyState" style="display: none;">
+                    <div class="icon">📭</div>
+                    <p>暂无售后记录</p>
+                </div>
+            </div>
+
+            <!-- 申请表单 -->
+            <div class="apply-form">
+                <h3>📝 申请售后</h3>
+
+                <div id="alertBox" class="alert" style="display: none;"></div>
+
+                <form id="aftersalesForm" onsubmit="submitAftersales(event)">
+                    <div class="form-group">
+                        <label>售后类型 <span style="color: var(--danger-color);">*</span></label>
+                        <select id="type" required>
+                            <option value="">请选择</option>
+                            <option value="REFUND">退款</option>
+                            <option value="EXCHANGE">换货</option>
+                            <option value="COMPLAINT">投诉</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>订单号 <span style="color: var(--danger-color);">*</span></label>
+                        <input type="text" id="orderId" placeholder="请输入订单号" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>问题描述 <span style="color: var(--danger-color);">*</span></label>
+                        <textarea id="description" placeholder="请详细描述您遇到的问题..." required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>上传凭证图片（最多9张）</label>
+                        <div class="upload-area" id="uploadArea"
+                             onclick="document.getElementById('fileInput').click()"
+                             ondrop="handleDrop(event)"
+                             ondragover="handleDragOver(event)"
+                             ondragleave="handleDragLeave(event)">
+                            <div class="upload-icon">📷</div>
+                            <div class="upload-text">点击或拖拽上传图片</div>
+                            <div class="upload-hint">支持 JPG、PNG 格式，单张不超过5MB</div>
+                        </div>
+                        <input type="file" id="fileInput" multiple accept="image/*"
+                               style="display: none;" onchange="handleFileSelect(event)">
+
+                        <div class="preview-grid" id="previewGrid"></div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        提交申请
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 演示售后数据
+        const demoAftersales = [
+            {
+                id: 'AS202601180001',
+                orderId: 'ORD202601180001',
+                type: 'REFUND',
+                typeName: '退款',
+                description: '商品有质量问题，申请退款',
+                status: 'PROCESSING',
+                statusName: '处理中',
+                createTime: '2026-01-18 15:30:00',
+                images: ['📷', '📷']
+            },
+            {
+                id: 'AS202601170001',
+                orderId: 'ORD202601170003',
+                type: 'EXCHANGE',
+                typeName: '换货',
+                description: '商品已过期，需要更换',
+                status: 'COMPLETED',
+                statusName: '已完成',
+                createTime: '2026-01-17 10:20:00',
+                reply: '您的换货申请已通过，新商品已发出',
+                images: ['📷', '📷', '📷']
+            }
+        ];
+
+        // 已上传的图片
+        let uploadedImages = [];
+        const maxImages = 9;
+
+        // 渲染售后列表
+        function renderAftersales() {
+            const list = document.getElementById('aftersalesList');
+            const emptyState = document.getElementById('emptyState');
+
+            if (demoAftersales.length === 0) {
+                list.style.display = 'none';
+                emptyState.style.display = 'block';
+                return;
+            }
+
+            list.style.display = 'grid';
+            emptyState.style.display = 'none';
+
+            let html = '';
+            demoAftersales.forEach(item => {
+                const statusClass = `status-${item.status.toLowerCase()}`;
+                const imagesHTML = item.images.map(img => `
+                    <div class="aftersales-image">${img}</div>
+                `).join('');
+
+                html += `
+                    <div class="aftersales-card">
+                        <div class="aftersales-header">
+                            <span class="aftersales-number">售后单号：${item.id}</span>
+                            <span class="aftersales-time">${item.createTime}</span>
+                        </div>
+                        <div class="aftersales-body">
+                            <div class="aftersales-item">
+                                <span class="aftersales-label">订单号：</span>
+                                <span class="aftersales-value">${item.orderId}</span>
+                            </div>
+                            <div class="aftersales-item">
+                                <span class="aftersales-label">类型：</span>
+                                <span class="aftersales-value">${item.typeName}</span>
+                            </div>
+                            <div class="aftersales-item">
+                                <span class="aftersales-label">状态：</span>
+                                <span class="status-badge ${statusClass}">${item.statusName}</span>
+                            </div>
+                            <div class="aftersales-description">${item.description}</div>
+                            ${item.images.length > 0 ? `
+                                <div class="aftersales-images">${imagesHTML}</div>
+                            ` : ''}
+                            ${item.reply ? `
+                                <div class="aftersales-description" style="background: #d4edda; color: #155724;">
+                                    <strong>客服回复：</strong>${item.reply}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+
+            list.innerHTML = html;
+        }
+
+        // 处理文件选择
+        function handleFileSelect(event) {
+            const files = event.target.files;
+            handleFiles(files);
+        }
+
+        // 处理拖拽放置
+        function handleDrop(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            document.getElementById('uploadArea').classList.remove('dragover');
+
+            const files = event.dataTransfer.files;
+            handleFiles(files);
+        }
+
+        // 处理拖拽经过
+        function handleDragOver(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            document.getElementById('uploadArea').classList.add('dragover');
+        }
+
+        // 处理拖拽离开
+        function handleDragLeave(event) {
+            event.preventDefault();
+            event.stopPropagation();
+            document.getElementById('uploadArea').classList.remove('dragover');
+        }
+
+        // 处理文件
+        function handleFiles(files) {
+            if (uploadedImages.length >= maxImages) {
+                showAlert('最多只能上传9张图片', 'danger');
+                return;
+            }
+
+            Array.from(files).forEach(file => {
+                if (!file.type.startsWith('image/')) {
+                    showAlert('只能上传图片文件', 'danger');
+                    return;
+                }
+
+                if (file.size > 5 * 1024 * 1024) {
+                    showAlert('图片大小不能超过5MB', 'danger');
+                    return;
+                }
+
+                if (uploadedImages.length < maxImages) {
+                    uploadedImages.push({ file: file, emoji: '📷' });
+                    renderPreview();
+                }
+            });
+        }
+
+        // 渲染预览
+        function renderPreview() {
+            const previewGrid = document.getElementById('previewGrid');
+
+            if (uploadedImages.length === 0) {
+                previewGrid.style.display = 'none';
+                return;
+            }
+
+            previewGrid.style.display = 'grid';
+
+            let html = '';
+            uploadedImages.forEach((image, index) => {
+                html += `
+                    <div class="preview-item">
+                        ${image.emoji}
+                        <div class="preview-remove" onclick="removeImage(${index})">×</div>
+                    </div>
+                `;
+            });
+
+            previewGrid.innerHTML = html;
+        }
+
+        // 移除图片
+        function removeImage(index) {
+            uploadedImages.splice(index, 1);
+            renderPreview();
+        }
+
+        // 提交售后申请
+        function submitAftersales(event) {
+            event.preventDefault();
+
+            const type = document.getElementById('type').value;
+            const orderId = document.getElementById('orderId').value.trim();
+            const description = document.getElementById('description').value.trim();
+
+            if (!type || !orderId || !description) {
+                showAlert('请填写所有必填项', 'danger');
+                return;
+            }
+
+            // 模拟提交成功
+            const newId = 'AS' + new Date().getTime();
+            const typeNames = { 'REFUND': '退款', 'EXCHANGE': '换货', 'COMPLAINT': '投诉' };
+
+            demoAftersales.unshift({
+                id: newId,
+                orderId: orderId,
+                type: type,
+                typeName: typeNames[type],
+                description: description,
+                status: 'PENDING',
+                statusName: '待处理',
+                createTime: new Date().toLocaleString('zh-CN'),
+                images: uploadedImages.map(img => img.emoji)
+            });
+
+            showAlert('售后申请提交成功！请耐心等待客服处理', 'success');
+
+            // 重置表单
+            document.getElementById('aftersalesForm').reset();
+            uploadedImages = [];
+            renderPreview();
+            renderAftersales();
+        }
+
+        // 显示提示信息
+        function showAlert(message, type) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.textContent = message;
+            alertBox.className = 'alert alert-' + type;
+            alertBox.style.display = 'block';
+
+            setTimeout(() => {
+                alertBox.style.display = 'none';
+            }, 5000);
+        }
+
+        // 页面加载时检查URL参数
+        window.onload = function() {
+            renderAftersales();
+
+            // 如果URL中有orderId参数，自动填充
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('orderId');
+            if (orderId) {
+                document.getElementById('orderId').value = orderId;
+            }
+        };
+    </script>
+</body>
+</html>
