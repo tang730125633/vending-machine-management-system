@@ -536,6 +536,27 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <!-- 💰 设备库存与购买演示区域 -->
+                    <div class="dashboard-section" id="inventorySection" style="display:none;">
+                        <h4>💰 设备商品库存与购买演示</h4>
+                        <p style="color: #666; font-size: 13px; margin-bottom: 15px;" id="selectedDeviceName">选中设备：未选择</p>
+
+                        <table class="mini-table">
+                            <thead>
+                                <tr>
+                                    <th>商品名称</th>
+                                    <th>价格</th>
+                                    <th>库存</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryBody">
+                                <tr><td colspan="5" style="text-align: center; color: #999;">请先选择一个设备</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
                 <!-- AI 智能分析区域 -->
@@ -570,6 +591,85 @@
                     <div style="text-align: center; margin-top: 30px;">
                         <button onclick="hideAIFeatures()">返回运营看板</button>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 远程配置模态框 -->
+    <div id="remoteConfigModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; align-items: center; justify-content: center;">
+        <div style="background: white; border-radius: 12px; width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+            <!-- 模态框头部 -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0;">
+                <h3 style="margin: 0; font-size: 18px; font-weight: 600;">🔧 远程配置</h3>
+                <p id="configModalSubtitle" style="margin: 5px 0 0 0; font-size: 13px; opacity: 0.9;">设备：XXX | 商品：XXX</p>
+            </div>
+
+            <!-- 模态框内容 -->
+            <div style="padding: 25px;">
+                <!-- 价格调整 -->
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; color: #333; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+                        💰 价格调整
+                    </label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" id="configPrice" step="0.1" min="0"
+                               style="flex: 1; padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px;"
+                               placeholder="输入新价格">
+                        <span style="color: #999; font-size: 14px;">元</span>
+                    </div>
+                    <p id="configPriceOriginal" style="margin: 5px 0 0 0; color: #999; font-size: 12px;">当前价格：¥0.00</p>
+                </div>
+
+                <!-- 库存调整 -->
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; color: #333; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+                        📦 库存调整
+                    </label>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <input type="number" id="configQuantity" step="1" min="0"
+                               style="flex: 1; padding: 10px; border: 2px solid #e0e0e0; border-radius: 6px; font-size: 14px;"
+                               placeholder="输入新库存">
+                        <span style="color: #999; font-size: 14px;">件</span>
+                    </div>
+                    <p id="configQuantityOriginal" style="margin: 5px 0 0 0; color: #999; font-size: 12px;">当前库存：0 件</p>
+                </div>
+
+                <!-- 上下架控制 -->
+                <div style="margin-bottom: 25px;">
+                    <label style="display: block; color: #333; font-weight: 600; margin-bottom: 8px; font-size: 14px;">
+                        🎛️ 上下架控制
+                    </label>
+                    <div style="display: flex; gap: 10px;">
+                        <label style="flex: 1; display: flex; align-items: center; padding: 12px; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'" onmouseout="this.style.borderColor='#e0e0e0'">
+                            <input type="radio" name="productStatus" value="ACTIVE" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">✅ 上架销售</span>
+                        </label>
+                        <label style="flex: 1; display: flex; align-items: center; padding: 12px; border: 2px solid #e0e0e0; border-radius: 6px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='#667eea'" onmouseout="this.style.borderColor='#e0e0e0'">
+                            <input type="radio" name="productStatus" value="INACTIVE" style="margin-right: 8px;">
+                            <span style="font-size: 14px;">⛔ 下架停售</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 模拟发送指令 -->
+                <div style="background: #f9fafb; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea; margin-bottom: 20px;">
+                    <p style="margin: 0; font-size: 13px; color: #666; line-height: 1.6;">
+                        <strong style="color: #667eea;">💡 提示：</strong>
+                        点击"发送配置指令"后，系统将通过MQTT协议将配置发送到设备终端，设备会在1-2秒内完成更新。
+                    </p>
+                </div>
+
+                <!-- 按钮组 -->
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="closeRemoteConfig()"
+                            style="flex: 1; padding: 12px; background: #e0e0e0; color: #666; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer;">
+                        取消
+                    </button>
+                    <button onclick="submitRemoteConfig()"
+                            style="flex: 2; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 6px; font-size: 14px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">
+                        📡 发送配置指令
+                    </button>
                 </div>
             </div>
         </div>
@@ -1133,11 +1233,25 @@
 
         // 全局演示设备数据
         const demoDevices = [
-            { name: '朝阳店-01号机', location: '朝阳区建国路88号', status: 'ONLINE', longitude: 116.46, latitude: 39.92, todayRevenue: 980, todayOrders: 32 },
-            { name: '海淀店-02号机', location: '海淀区中关村大街1号', status: 'ONLINE', longitude: 116.31, latitude: 39.98, todayRevenue: 1250, todayOrders: 45 },
-            { name: '丰台店-03号机', location: '丰台区南三环路12号', status: 'ONLINE', longitude: 116.37, latitude: 39.86, todayRevenue: 850, todayOrders: 28 },
-            { name: '东城店-04号机', location: '东城区王府井大街36号', status: 'OFFLINE', longitude: 116.41, latitude: 39.92, todayRevenue: 0, todayOrders: 0 },
-            { name: '西城店-05号机', location: '西城区金融街9号', status: 'ONLINE', longitude: 116.36, latitude: 39.92, todayRevenue: 1500, todayOrders: 51 }
+            {
+                name: '朝阳店-01号机',
+                location: '朝阳区建国路88号',
+                status: 'ONLINE',
+                longitude: 116.46,
+                latitude: 39.92,
+                todayRevenue: 980,
+                todayOrders: 32,
+                inventory: [
+                    { name: '可口可乐', price: 3.5, quantity: 25, maxQuantity: 30, status: 'NORMAL' },
+                    { name: '农夫山泉', price: 2.0, quantity: 8, maxQuantity: 30, status: 'LOW_STOCK' },
+                    { name: '统一冰红茶', price: 3.0, quantity: 0, maxQuantity: 25, status: 'OUT_OF_STOCK' },
+                    { name: '乐事薯片', price: 6.0, quantity: 18, maxQuantity: 20, status: 'NORMAL' }
+                ]
+            },
+            { name: '海淀店-02号机', location: '海淀区中关村大街1号', status: 'ONLINE', longitude: 116.31, latitude: 39.98, todayRevenue: 1250, todayOrders: 45, inventory: [] },
+            { name: '丰台店-03号机', location: '丰台区南三环路12号', status: 'ONLINE', longitude: 116.37, latitude: 39.86, todayRevenue: 850, todayOrders: 28, inventory: [] },
+            { name: '东城店-04号机', location: '东城区王府井大街36号', status: 'OFFLINE', longitude: 116.41, latitude: 39.92, todayRevenue: 0, todayOrders: 0, inventory: [] },
+            { name: '西城店-05号机', location: '西城区金融街9号', status: 'ONLINE', longitude: 116.36, latitude: 39.92, todayRevenue: 1500, todayOrders: 51, inventory: [] }
         ];
 
         // 5. 设备地图分布
@@ -1190,23 +1304,67 @@
                 const statusText = device.status === 'ONLINE' ? '在线' : '离线';
                 const statusColor = device.status === 'ONLINE' ? '#28a745' : '#dc3545';
 
+                // 计算库存统计信息
+                let totalInventory = 0;
+                let lowStockCount = 0;
+                let outOfStockCount = 0;
+                if (device.inventory && device.inventory.length > 0) {
+                    device.inventory.forEach(item => {
+                        totalInventory += item.quantity;
+                        if (item.status === 'LOW_STOCK') lowStockCount++;
+                        if (item.status === 'OUT_OF_STOCK') outOfStockCount++;
+                    });
+                }
+
+                // 计算设备利用率（模拟数据）
+                const utilization = device.status === 'ONLINE' ? Math.floor(75 + Math.random() * 20) : 0;
+                const utilizationColor = utilization > 80 ? '#28a745' : utilization > 50 ? '#ffc107' : '#dc3545';
+
+                // 构建库存警告信息
+                let inventoryWarning = '';
+                if (outOfStockCount > 0) {
+                    inventoryWarning = `<div style="background: #dc354522; color: #dc3545; padding: 5px 8px; border-radius: 4px; margin-top: 8px; font-size: 12px;">⚠️ ${outOfStockCount} 种商品缺货</div>`;
+                } else if (lowStockCount > 0) {
+                    inventoryWarning = `<div style="background: #ffc10722; color: #ffc107; padding: 5px 8px; border-radius: 4px; margin-top: 8px; font-size: 12px;">⚠️ ${lowStockCount} 种商品库存偏低</div>`;
+                }
+
                 const infoWindow = new AMap.InfoWindow({
                     content: `
-                        <div style="padding: 10px; min-width: 200px;">
-                            <h4 style="margin: 0 0 10px 0; color: #333; font-size: 16px;">${device.name}</h4>
-                            <p style="margin: 5px 0; color: #666; font-size: 14px;">
-                                <strong>位置:</strong> ${device.location}
-                            </p>
-                            <p style="margin: 5px 0; font-size: 14px;">
-                                <strong>状态:</strong>
-                                <span style="color: ${statusColor}; font-weight: 600;">${statusText}</span>
-                            </p>
-                            <p style="margin: 5px 0; color: #666; font-size: 14px;">
-                                <strong>今日销售额:</strong> ¥${device.todayRevenue || 0}
-                            </p>
-                            <p style="margin: 5px 0; color: #666; font-size: 14px;">
-                                <strong>今日订单数:</strong> ${device.todayOrders || 0} 单
-                            </p>
+                        <div style="padding: 15px; min-width: 280px; font-family: -apple-system, sans-serif;">
+                            <div style="border-bottom: 2px solid #667eea; padding-bottom: 8px; margin-bottom: 12px;">
+                                <h4 style="margin: 0; color: #333; font-size: 16px; font-weight: 600;">${device.name}</h4>
+                                <p style="margin: 5px 0 0 0; color: #999; font-size: 12px;">📍 ${device.location}</p>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                                <div style="background: #f5f7fa; padding: 8px; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 11px; color: #999;">设备状态</div>
+                                    <div style="font-size: 14px; font-weight: 600; color: ${statusColor}; margin-top: 3px;">${statusText}</div>
+                                </div>
+                                <div style="background: #f5f7fa; padding: 8px; border-radius: 6px; text-align: center;">
+                                    <div style="font-size: 11px; color: #999;">利用率</div>
+                                    <div style="font-size: 14px; font-weight: 600; color: ${utilizationColor}; margin-top: 3px;">${utilization}%</div>
+                                </div>
+                            </div>
+
+                            <div style="background: linear-gradient(135deg, #667eea22 0%, #764ba222 100%); padding: 10px; border-radius: 6px; margin-bottom: 10px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                                    <span style="font-size: 12px; color: #666;">今日销售额</span>
+                                    <span style="font-size: 16px; font-weight: 600; color: #667eea;">¥${device.todayRevenue || 0}</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <span style="font-size: 12px; color: #666;">今日订单数</span>
+                                    <span style="font-size: 14px; font-weight: 600; color: #764ba2;">${device.todayOrders || 0} 单</span>
+                                </div>
+                            </div>
+
+                            ${device.inventory && device.inventory.length > 0 ? `
+                            <div style="background: #f9fafb; padding: 8px; border-radius: 6px; font-size: 12px;">
+                                <div style="color: #666; margin-bottom: 3px;">📦 商品种类：${device.inventory.length} 种</div>
+                                <div style="color: #666;">📊 总库存：${totalInventory} 件</div>
+                            </div>
+                            ${inventoryWarning}
+                            ` : '<div style="background: #f9fafb; padding: 8px; border-radius: 6px; font-size: 12px; color: #999; text-align: center;">暂无库存数据</div>'}
                         </div>
                     `,
                     offset: new AMap.Pixel(0, -34)
@@ -1317,20 +1475,22 @@
             // 渲染设备表格
             const devicesBody = document.getElementById('devicesBody');
             let devicesHTML = '';
-            demoData.devices.forEach(device => {
+            demoData.devices.forEach((device, index) => {
                 const statusClass = device.status === 'ONLINE' ? 'online' : 'offline';
                 const statusText = device.status === 'ONLINE' ? '在线' : '离线';
+                const hasInventory = device.inventory && device.inventory.length > 0;
                 devicesHTML += `
                     <tr>
                         <td>
                             <a href="javascript:void(0)"
                                onclick="locateDevice('${device.name}')"
-                               style="color: #f97316; text-decoration: none; cursor: pointer; font-weight: 500;"
+                               style="color: #667eea; text-decoration: none; cursor: pointer; font-weight: 500;"
                                onmouseover="this.style.textDecoration='underline'"
                                onmouseout="this.style.textDecoration='none'"
                                title="点击在地图上定位此设备">
                                 📍 ${device.name}
                             </a>
+                            ${hasInventory ? `<button onclick="displayDeviceInventory(${index})" style="margin-left: 8px; font-size: 12px; padding: 2px 8px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">查看库存</button>` : ''}
                         </td>
                         <td>${device.location}</td>
                         <td><span class="status-badge ${statusClass}">${statusText}</span></td>
@@ -1688,6 +1848,360 @@
                 resultDiv.innerHTML = `<p style="color: #dc3545;">❌ 预测失败: ${error.message}</p>`;
             }
         }
+
+        // ==================== 库存与购买演示功能 ====================
+
+        // 显示设备库存
+        function displayDeviceInventory(deviceIndex) {
+            const device = demoDevices[deviceIndex];
+            if (!device || !device.inventory || device.inventory.length === 0) {
+                alert('该设备暂无库存数据');
+                return;
+            }
+
+            // 显示库存区域
+            document.getElementById('inventorySection').style.display = 'block';
+            document.getElementById('selectedDeviceName').textContent = `选中设备：${device.name}`;
+
+            // 渲染库存表格
+            const inventoryBody = document.getElementById('inventoryBody');
+            let inventoryHTML = '';
+
+            device.inventory.forEach((product, productIndex) => {
+                // 根据库存状态设置颜色
+                let statusColor = '#28a745'; // 绿色（正常）
+                let statusText = '库存充足';
+                let stockPercentage = (product.quantity / product.maxQuantity) * 100;
+
+                if (product.status === 'OUT_OF_STOCK' || product.quantity === 0) {
+                    statusColor = '#dc3545'; // 红色（缺货）
+                    statusText = '缺货告急';
+                } else if (product.status === 'LOW_STOCK' || stockPercentage < 30) {
+                    statusColor = '#ffc107'; // 黄色（低库存）
+                    statusText = '库存偏低';
+                }
+
+                // 购买按钮：缺货时禁用
+                const buyButton = product.quantity > 0
+                    ? `<button onclick="simulatePurchase(${deviceIndex}, ${productIndex})" style="background: #28a745; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; margin-right: 5px;">模拟购买</button>`
+                    : `<button disabled style="background: #ccc; color: #666; border: none; padding: 5px 12px; border-radius: 4px; cursor: not-allowed; font-size: 12px; margin-right: 5px;">已售罄</button>`;
+
+                // 远程配置按钮
+                const configButton = `<button onclick="openRemoteConfig(${deviceIndex}, ${productIndex})" style="background: #667eea; color: white; border: none; padding: 5px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">远程配置</button>`;
+
+                inventoryHTML += `
+                    <tr>
+                        <td><strong>${product.name}</strong></td>
+                        <td style="color: #667eea; font-weight: 600;">¥${product.price.toFixed(2)}</td>
+                        <td>
+                            <span style="font-weight: 600;">${product.quantity}</span> / ${product.maxQuantity}
+                            <span style="font-size: 11px; color: #999;">(${stockPercentage.toFixed(0)}%)</span>
+                        </td>
+                        <td>
+                            <span style="display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; background: ${statusColor}22; color: ${statusColor};">
+                                ${statusText}
+                            </span>
+                        </td>
+                        <td>${buyButton}${configButton}</td>
+                    </tr>
+                `;
+            });
+
+            inventoryBody.innerHTML = inventoryHTML;
+
+            // 滚动到库存区域
+            document.getElementById('inventorySection').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // 模拟购买功能
+        function simulatePurchase(deviceIndex, productIndex) {
+            const device = demoDevices[deviceIndex];
+            const product = device.inventory[productIndex];
+
+            if (product.quantity === 0) {
+                alert('该商品已售罄！');
+                return;
+            }
+
+            // 扣减库存
+            product.quantity -= 1;
+
+            // 更新设备销售数据
+            device.todayRevenue += product.price;
+            device.todayOrders += 1;
+
+            // 自动更新库存状态
+            const stockPercentage = (product.quantity / product.maxQuantity) * 100;
+            if (product.quantity === 0) {
+                product.status = 'OUT_OF_STOCK';
+            } else if (stockPercentage < 30) {
+                product.status = 'LOW_STOCK';
+            } else {
+                product.status = 'NORMAL';
+            }
+
+            // 显示购买成功提示（带动画）
+            showPurchaseNotification(product.name, product.price, product.quantity);
+
+            // 刷新库存表格
+            displayDeviceInventory(deviceIndex);
+
+            // 更新设备表格中的销售额
+            renderDemoDashboard();
+        }
+
+        // 显示购买成功通知
+        function showPurchaseNotification(productName, price, remainingStock) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                color: white;
+                padding: 20px 25px;
+                border-radius: 10px;
+                box-shadow: 0 8px 30px rgba(40, 167, 69, 0.4);
+                z-index: 10000;
+                font-size: 14px;
+                min-width: 300px;
+                animation: slideInRight 0.4s ease-out;
+            `;
+
+            let stockWarning = '';
+            if (remainingStock === 0) {
+                stockWarning = '<div style="margin-top: 8px; padding: 8px; background: rgba(220, 53, 69, 0.2); border-radius: 5px; font-size: 12px;">⚠️ 警告：该商品已售罄！</div>';
+            } else if (remainingStock < 10) {
+                stockWarning = `<div style="margin-top: 8px; padding: 8px; background: rgba(255, 193, 7, 0.2); border-radius: 5px; font-size: 12px;">⚠️ 警告：库存仅剩 ${remainingStock} 件</div>`;
+            }
+
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 24px; margin-right: 10px;">✅</span>
+                    <strong style="font-size: 16px;">购买成功！</strong>
+                </div>
+                <div style="font-size: 13px; opacity: 0.95;">
+                    商品：${productName}<br>
+                    金额：¥${price.toFixed(2)}<br>
+                    剩余库存：${remainingStock} 件
+                </div>
+                ${stockWarning}
+            `;
+
+            document.body.appendChild(notification);
+
+            // 添加动画样式
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideInRight {
+                    from {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+
+            // 3秒后自动消失
+            setTimeout(() => {
+                notification.style.animation = 'slideInRight 0.3s ease-out reverse';
+                setTimeout(() => {
+                    notification.remove();
+                    style.remove();
+                }, 300);
+            }, 3000);
+        }
+
+        // ==================== 远程配置功能 ====================
+
+        let currentConfigDevice = null;
+        let currentConfigProduct = null;
+
+        // 打开远程配置模态框
+        function openRemoteConfig(deviceIndex, productIndex) {
+            const device = demoDevices[deviceIndex];
+            const product = device.inventory[productIndex];
+
+            // 保存当前配置的设备和商品索引
+            currentConfigDevice = deviceIndex;
+            currentConfigProduct = productIndex;
+
+            // 更新模态框标题
+            document.getElementById('configModalSubtitle').textContent =
+                `设备：${device.name} | 商品：${product.name}`;
+
+            // 填充当前数据
+            document.getElementById('configPrice').value = product.price;
+            document.getElementById('configPriceOriginal').textContent = `当前价格：¥${product.price.toFixed(2)}`;
+
+            document.getElementById('configQuantity').value = product.quantity;
+            document.getElementById('configQuantityOriginal').textContent = `当前库存：${product.quantity} 件 / 最大容量：${product.maxQuantity} 件`;
+
+            // 设置上下架状态（默认上架）
+            document.querySelector('input[name="productStatus"][value="ACTIVE"]').checked = true;
+
+            // 显示模态框
+            const modal = document.getElementById('remoteConfigModal');
+            modal.style.display = 'flex';
+        }
+
+        // 关闭远程配置模态框
+        function closeRemoteConfig() {
+            document.getElementById('remoteConfigModal').style.display = 'none';
+            currentConfigDevice = null;
+            currentConfigProduct = null;
+        }
+
+        // 提交远程配置
+        function submitRemoteConfig() {
+            if (currentConfigDevice === null || currentConfigProduct === null) {
+                alert('配置数据丢失，请重新打开配置窗口');
+                return;
+            }
+
+            const device = demoDevices[currentConfigDevice];
+            const product = device.inventory[currentConfigProduct];
+
+            // 获取新配置
+            const newPrice = parseFloat(document.getElementById('configPrice').value);
+            const newQuantity = parseInt(document.getElementById('configQuantity').value);
+            const newStatus = document.querySelector('input[name="productStatus"]:checked')?.value;
+
+            // 验证数据
+            if (isNaN(newPrice) || newPrice < 0) {
+                alert('请输入有效的价格（大于等于0）');
+                return;
+            }
+
+            if (isNaN(newQuantity) || newQuantity < 0) {
+                alert('请输入有效的库存数量（大于等于0）');
+                return;
+            }
+
+            if (newQuantity > product.maxQuantity) {
+                alert(`库存数量不能超过最大容量（${product.maxQuantity}件）`);
+                return;
+            }
+
+            if (!newStatus) {
+                alert('请选择上下架状态');
+                return;
+            }
+
+            // 模拟MQTT发送过程（显示加载动画）
+            const submitButton = event.target;
+            const originalText = submitButton.innerHTML;
+            submitButton.innerHTML = '📡 发送中...';
+            submitButton.disabled = true;
+
+            setTimeout(() => {
+                // 应用新配置
+                const oldPrice = product.price;
+                const oldQuantity = product.quantity;
+
+                product.price = newPrice;
+                product.quantity = newQuantity;
+
+                // 自动更新库存状态
+                const stockPercentage = (product.quantity / product.maxQuantity) * 100;
+                if (product.quantity === 0) {
+                    product.status = 'OUT_OF_STOCK';
+                } else if (stockPercentage < 30) {
+                    product.status = 'LOW_STOCK';
+                } else {
+                    product.status = 'NORMAL';
+                }
+
+                // 显示配置成功通知
+                showConfigSuccessNotification(device.name, product.name, {
+                    price: { old: oldPrice, new: newPrice },
+                    quantity: { old: oldQuantity, new: newQuantity },
+                    status: newStatus
+                });
+
+                // 关闭模态框
+                closeRemoteConfig();
+
+                // 刷新库存表格（如果正在查看该设备）
+                displayDeviceInventory(currentConfigDevice);
+
+                // 刷新地图（库存状态可能变化）
+                initDeviceMap();
+
+                // 恢复按钮状态
+                submitButton.innerHTML = originalText;
+                submitButton.disabled = false;
+            }, 1500); // 模拟1.5秒的网络延迟
+        }
+
+        // 显示配置成功通知
+        function showConfigSuccessNotification(deviceName, productName, changes) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 80px;
+                right: 20px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 20px 25px;
+                border-radius: 10px;
+                box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+                z-index: 10001;
+                font-size: 14px;
+                min-width: 320px;
+                animation: slideInRight 0.4s ease-out;
+            `;
+
+            let changesHTML = '';
+
+            if (changes.price.old !== changes.price.new) {
+                changesHTML += `<div style="margin-top: 5px;">💰 价格：¥${changes.price.old.toFixed(2)} → ¥${changes.price.new.toFixed(2)}</div>`;
+            }
+
+            if (changes.quantity.old !== changes.quantity.new) {
+                changesHTML += `<div style="margin-top: 5px;">📦 库存：${changes.quantity.old} 件 → ${changes.quantity.new} 件</div>`;
+            }
+
+            changesHTML += `<div style="margin-top: 5px;">🎛️ 状态：${changes.status === 'ACTIVE' ? '✅ 上架销售' : '⛔ 下架停售'}</div>`;
+
+            notification.innerHTML = `
+                <div style="display: flex; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 24px; margin-right: 10px;">✅</span>
+                    <strong style="font-size: 16px;">配置指令已发送</strong>
+                </div>
+                <div style="font-size: 13px; opacity: 0.95;">
+                    设备：${deviceName}<br>
+                    商品：${productName}
+                </div>
+                <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.3); font-size: 12px;">
+                    ${changesHTML}
+                </div>
+                <div style="margin-top: 10px; font-size: 11px; opacity: 0.8; font-style: italic;">
+                    ⚡ 设备将在1-2秒内完成更新
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // 3秒后自动消失
+            setTimeout(() => {
+                notification.style.animation = 'slideInRight 0.3s ease-out reverse';
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 4000);
+        }
+
+        // 点击模态框外部关闭
+        document.getElementById('remoteConfigModal')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeRemoteConfig();
+            }
+        });
     </script>
 </body>
 </html>
