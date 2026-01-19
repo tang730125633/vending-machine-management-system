@@ -287,6 +287,19 @@
                 </div>
             </div>
 
+            <!-- 演示模式入口 -->
+            <div style="text-align: center; margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%); border: 2px dashed #ffc107; border-radius: 8px;">
+                <p style="color: #856404; margin-bottom: 15px; font-size: 16px; font-weight: 600;">
+                    🚀 无需注册，立即体验系统功能
+                </p>
+                <button onclick="enterDemoMode()" style="padding: 12px 30px; background: linear-gradient(135deg, #f97316 0%, #c2410c 100%); color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                    进入演示模式
+                </button>
+                <p style="color: #856404; margin-top: 10px; font-size: 13px;">
+                    演示模式可直接访问管理后台，无需真实账号
+                </p>
+            </div>
+
             <!-- 仪表板 -->
             <div class="dashboard" id="dashboard">
                 <div class="user-info">
@@ -444,6 +457,12 @@
             document.getElementById('authForms').classList.remove('hidden');
             document.getElementById('dashboard').classList.remove('active');
             document.getElementById('responseOutput').textContent = '点击上方按钮测试 API...';
+        }
+
+        // 进入演示模式（直接跳转到管理后台）
+        function enterDemoMode() {
+            // 跳转到dashboard.html，dashboard会自动加载admin.html
+            window.location.href = 'dashboard.html';
         }
 
         // 测试 API

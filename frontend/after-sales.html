@@ -105,14 +105,20 @@
         }
 
         tbody td {
-            padding: 12px;
+            padding: 15px 12px;
             border-bottom: 1px solid #f0f0f0;
             font-size: 13px;
             color: #666;
         }
 
+        tbody tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
         tbody tr:hover {
-            background-color: #f8f9fa;
+            background-color: #fff8f0;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         .badge {

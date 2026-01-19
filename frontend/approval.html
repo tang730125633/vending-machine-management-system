@@ -121,14 +121,20 @@
         }
 
         tbody td {
-            padding: 15px;
+            padding: 16px 15px;
             border-bottom: 1px solid #f0f0f0;
             font-size: 14px;
             color: #666;
         }
 
+        tbody tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
         tbody tr:hover {
-            background-color: #f8f9fa;
+            background-color: #fff8f0;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         .badge {
@@ -362,6 +368,10 @@
         let currentUser = null;
 
         // 演示数据
+        // 统计数据计数器（演示模式用）
+        let approvedCount = 31;  // 初始已通过数量
+        let rejectedCount = 7;   // 初始已拒绝数量
+
         const demoData = [
             {
                 id: 1,
@@ -568,6 +578,7 @@
 
             if (isDemoMode) {
                 // 演示模式
+                approvedCount++;  // 增加已通过计数
                 showAlert(`用户"${currentUser.username}"审核通过，账号已激活`, 'success');
                 removeUserFromList(currentUser.id);
                 closeModal();
@@ -599,6 +610,7 @@
 
             if (isDemoMode) {
                 // 演示模式
+                rejectedCount++;  // 增加已拒绝计数
                 showAlert(`用户"${currentUser.username}"已被拒绝`, 'success');
                 removeUserFromList(currentUser.id);
                 closeModal();
@@ -638,8 +650,8 @@
         function updateStats() {
             const pending = demoData.filter(u => u.status === 'PENDING').length;
             document.getElementById('totalPending').textContent = pending;
-            document.getElementById('totalApproved').textContent = Math.floor(Math.random() * 50) + 20;
-            document.getElementById('totalRejected').textContent = Math.floor(Math.random() * 10) + 3;
+            document.getElementById('totalApproved').textContent = approvedCount;
+            document.getElementById('totalRejected').textContent = rejectedCount;
         }
 
         // 显示提示信息

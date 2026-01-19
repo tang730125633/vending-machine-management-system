@@ -195,14 +195,20 @@
         }
 
         tbody td {
-            padding: 15px 12px;
+            padding: 16px 12px;
             border-bottom: 1px solid #f0f0f0;
             font-size: 14px;
             color: #666;
         }
 
+        tbody tr:nth-child(even) {
+            background-color: #fafafa;
+        }
+
         tbody tr:hover {
-            background-color: #f8f9fa;
+            background-color: #fff8f0;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         .order-no {
@@ -433,12 +439,24 @@
             { orderNo: 'VM20260118010', time: '2026-01-18 15:15:10', product: '怡宝', quantity: 2, amount: 4.00, payment: 'WECHAT', status: 'PAID', device: '设备001' }
         ];
 
-        // 进入演示模式
+        // 进入/退出演示模式
         function enterDemoMode() {
-            isDemoMode = true;
-            showAlert('演示模式已启用，所有操作将使用模拟数据', 'success');
-            renderTable(demoOrders);
-            updateStats();
+            const btn = event.target;
+            if (!isDemoMode) {
+                // 进入演示模式
+                isDemoMode = true;
+                btn.textContent = '❌ 退出演示模式';
+                showAlert('演示模式已启用，所有操作将使用模拟数据', 'success');
+                renderTable(demoOrders);
+                updateStats();
+            } else {
+                // 退出演示模式
+                isDemoMode = false;
+                btn.textContent = '🚀 演示模式';
+                showAlert('已退出演示模式', 'info');
+                renderTable([]);
+                updateStats();
+            }
         }
 
         // 渲染表格
